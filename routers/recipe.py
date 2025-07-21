@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from core.dbutils import get_db
 from models.models import Recipe
-from models.schemas import RecipeCreate, Recipe as RecipeSchema, RecipeUpdate, PaginatedRecipeResponse
+from models.schemas import RecipeCreate, Recipe as RecipeSchema, RecipeUpdate, PaginatedRecipeResponse, ListRecipesRequest
 from typing import Optional
 
 router = APIRouter()
@@ -60,23 +60,19 @@ def get_recipe(recipe_id: str, db: Session = Depends(get_db)):
     
     return recipe
 
-@router.get("", response_model=PaginatedRecipeResponse)
+@router.post("/search", response_model=PaginatedRecipeResponse)
 def list_recipes(
-    db: Session = Depends(get_db),
-    page: int = Query(1, gt=0),
-    page_size: int = Query(10, gt=0, le=100),
-    search: Optional[str] = None,
-    sort_by: Optional[str] = Query(None, enum=["name", "created_at", "prep_time"]),
-    sort_order: Optional[str] = Query("asc", enum=["asc", "desc"])
+    payload: ListRecipesRequest,
+    db: Session = Depends(get_db)
 ):
     query = db.query(Recipe)
     
     # Apply search filter if provided
-    if search:
+    if payload.search:
         search_filter = or_(
-            Recipe.name.ilike(f"%{search}%"),
-            Recipe.ingredients.ilike(f"%{search}%"),
-            Recipe.instructions.ilike(f"%{search}%")
+            Recipe.name.ilike(f"%{payload.search}%"),
+            Recipe.ingredients.ilike(f"%{payload.search}%"),
+            Recipe.instructions.ilike(f"%{payload.search}%")
         )
         query = query.filter(search_filter)
     
@@ -84,18 +80,24 @@ def list_recipes(
     total = query.count()
     
     # Apply sorting
-    if sort_by:
-        sort_column = getattr(Recipe, sort_by)
-        if sort_order == "desc":
+    if payload.sort_by:
+        if payload.sort_by not in ["name", "created_at"]:
+            raise HTTPException(status_code=400, detail="Invalid sort_by field")
+        
+        sort_column = getattr(Recipe, payload.sort_by)
+        if payload.sort_order == "desc":
             sort_column = sort_column.desc()
         query = query.order_by(sort_column)
     
     # Apply pagination
-    recipes = query.offset((page - 1) * page_size).limit(page_size).all()
+    if payload.page_size > 100:
+        payload.page_size = 100
+    
+    recipes = query.offset((payload.page - 1) * payload.page_size).limit(payload.page_size).all()
     
     return PaginatedRecipeResponse(
         total=total,
-        page=page,
-        page_size=page_size,
+        page=payload.page,
+        page_size=payload.page_size,
         recipes=recipes
     )

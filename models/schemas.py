@@ -31,6 +31,13 @@ class Recipe(RecipeBase):
     class Config:
         from_attributes = True
 
+class ListRecipesRequest(BaseModel):
+    page: int = 1
+    page_size: int = 10
+    search: Optional[str] = None
+    sort_by: Optional[str] = None
+    sort_order: Optional[str] = "asc"
+
 class PaginatedRecipeResponse(BaseModel):
     total: int
     page: int
