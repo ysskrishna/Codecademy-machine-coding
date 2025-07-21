@@ -73,6 +73,32 @@ Each recipe includes:
 2. The API will be available at `http://localhost:8085`
 3. Access the interactive API documentation at `http://localhost:8085/docs`
 
+## Testing
+
+The project uses pytest for testing. The test suite includes integration tests that cover all major API endpoints and functionality including:
+
+- Recipe creation
+- Recipe retrieval
+- Recipe updates
+- Recipe deletion
+- Search functionality with pagination and sorting
+- Error handling
+
+### Running Tests
+
+To run the tests:
+
+```bash
+pytest tests/
+```
+
+The test suite uses an in-memory SQLite database to ensure tests are isolated and don't affect your development or production database.
+
+### Test Structure
+
+- `tests/conftest.py`: Contains pytest fixtures including:
+- `tests/test_recipe.py`: Contains all API endpoint tests
+
 ## Running with Docker
 
 The application can be run using Docker Compose, which sets up both the API service and a PostgreSQL database.
