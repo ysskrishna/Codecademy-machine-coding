@@ -4,13 +4,28 @@ A RESTful API service for managing cooking recipes, built with FastAPI and SQLAl
 
 ## Features
 
-- CRUD operations for recipes
-- Paginated recipe listing
-- Search functionality
-- Advanced filtering and sorting
+- Full CRUD operations for recipes (Create, Read, Update, Delete)
+- Smart search functionality across recipe names, ingredients, and instructions
+- Advanced sorting by name or creation date
+- Timestamp tracking (created_at, updated_at)
 - SQLite database storage
 - RESTful API design
 - Proper error handling and HTTP status codes
+- OpenAPI documentation (Swagger UI)
+
+## Recipe Data Structure
+
+Each recipe includes:
+- `recipe_id`: Unique identifier (UUID)
+- `name`: Recipe name
+- `ingredients`: List of ingredients
+- `instructions`: Cooking instructions
+- `prep_time`: Preparation time (optional)
+- `cook_time`: Cooking time (optional)
+- `servings`: Number of servings (optional)
+- `image_url`: URL to recipe image (optional)
+- `created_at`: Creation timestamp
+- `updated_at`: Last update timestamp
 
 ## Tech Stack
 
@@ -18,8 +33,8 @@ A RESTful API service for managing cooking recipes, built with FastAPI and SQLAl
 - FastAPI (Web Framework)
 - SQLAlchemy (ORM)
 - Pydantic (Data Validation)
-- SQLite (Database)
 - Uvicorn (ASGI Server)
+- python-dotenv (Environment Configuration)
 
 ## Prerequisites
 
@@ -57,3 +72,40 @@ A RESTful API service for managing cooking recipes, built with FastAPI and SQLAl
 
 2. The API will be available at `http://localhost:8085`
 3. Access the interactive API documentation at `http://localhost:8085/docs`
+
+## Running with Docker
+
+The application can be run using Docker Compose, which sets up both the API service and a PostgreSQL database.
+
+1. Make sure you have Docker and Docker Compose installed on your system.
+
+2. Build and start the containers:
+   ```bash
+   docker compose up --build
+   ```
+
+3. The services will be available at:
+   - API: `http://localhost:8085`
+   - API Documentation: `http://localhost:8085/docs`
+   - PostgreSQL Database: `localhost:5432`
+
+To stop the services:
+```bash
+docker compose down
+```
+
+To stop the services and remove persistent data:
+```bash
+docker compose down -v
+```
+
+## API Endpoints
+
+- `POST /recipes` - Create a new recipe
+- `GET /recipes/{recipe_id}` - Get a specific recipe
+- `PUT /recipes/{recipe_id}` - Update a recipe
+- `DELETE /recipes/{recipe_id}` - Delete a recipe
+- `POST /recipes/search` - Search and list recipes with:
+  - Pagination (`page`, `page_size`)
+  - Text search across name, ingredients, and instructions
+  - Sorting by name or creation date (asc/desc)
